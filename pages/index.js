@@ -6,7 +6,7 @@ export default function Home({ results }) {
   const router = useRouter();
 
   const onClick = (id, title) => {
-    router.push({ pathname: `/movies/${id}`, query: { id, title } }, `/movies/${id}`);
+    router.push(`/movies/${title}/${id}`);
   };
 
   return (
@@ -14,15 +14,9 @@ export default function Home({ results }) {
       <Seo title="Home" />
       {results?.map((movie) => {
         return (
-          <div className="movie" key={movie.id} onClick={onClick.bind(null, movie.id, movie.title)}>
+          <div className="movie" key={movie.id} onClick={onClick.bind(null, movie.id, movie.original_title)}>
             <img src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} />
-            <Link
-              href={{
-                pathname: `/movies/${movie.id}`,
-                query: { id: movie.id, title: movie.title },
-              }}
-              as={`/movies/${movie.id}`}
-            >
+            <Link href={`/${movie.original_title}/movies/${movie.id}`}>
               <a>
                 <h4>{movie.original_title}</h4>
               </a>
