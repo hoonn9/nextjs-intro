@@ -1,27 +1,32 @@
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/router";
 import Seo from "../components/Seo";
 
-export default function Home() {
-  const [movies, setMovies] = useState([]);
+export default function Home({ results }) {
+  const router = useRouter();
 
-  async function getMovies() {
-    const { results } = await (await fetch(`/api/movies`)).json();
-    setMovies(results);
-  }
-
-  useEffect(() => {
-    getMovies();
-  }, []);
+  const onClick = (id, title) => {
+    router.push({ pathname: `/movies/${id}`, query: { id, title } }, `/movies/${id}`);
+  };
 
   return (
     <div className="container">
       <Seo title="Home" />
-      {!movies && <h4>Loading...</h4>}
-      {movies?.map((movie) => {
+      {results?.map((movie) => {
         return (
-          <div className="movie" key={movie.id}>
-            <img src={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`} />
-            <h4>{movie.original_title}</h4>
+          <div className="movie" key={movie.id} onClick={onClick.bind(null, movie.id, movie.title)}>
+            <img src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} />
+            <Link
+              href={{
+                pathname: `/movies/${movie.id}`,
+                query: { id: movie.id, title: movie.title },
+              }}
+              as={`/movies/${movie.id}`}
+            >
+              <a>
+                <h4>{movie.original_title}</h4>
+              </a>
+            </Link>
           </div>
         );
       })}
@@ -48,4 +53,17 @@ export default function Home() {
       `}</style>
     </div>
   );
+}
+
+// render 전 서버에서 처리
+// Server side에서 처리하여 컴포넌트로 Props 전달
+export async function getServerSideProps() {
+  // rewrite server side에선 호스트 url까지 필요
+  const { results } = await (await fetch(`http://localhost:3000/api/movies`)).json();
+
+  return {
+    props: {
+      results,
+    },
+  };
 }
